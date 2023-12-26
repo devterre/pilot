@@ -1,7 +1,7 @@
-package main 
+package main
 
-import "fmt"
+import "github.com/devterre/pilot/cmd"
 
-func main(){
-  fmt.Println("hello")
+func main() {
+	cmd.Execute()
 }
