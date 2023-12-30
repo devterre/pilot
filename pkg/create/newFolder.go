@@ -3,16 +3,10 @@ package create
 import (
 	"errors"
 	"fmt"
+	"os/exec"
 
 	"github.com/manifoldco/promptui"
 )
-
-var templates = &promptui.PromptTemplates{
-	Prompt:  "{{ . }} ",
-	Valid:   "{{ . | green }} ",
-	Invalid: "{{ . | red }} ",
-	Success: "{{ . | bold }} ",
-}
 
 func CreateNewFolder() error {
 	prompt := promptui.Select{
@@ -28,24 +22,38 @@ func CreateNewFolder() error {
 
 	if result == "Yes" {
 		fmt.Println("Creating new folder for the project. Please provide a valid name to this project.")
-		projectNamePrompt := promptui.Prompt{
-			Label:     "Please provide project name.",
-			Templates: templates,
-			Validate:  validateProjectName,
-		}
-
-		result, err := projectNamePrompt.Run()
-
-		if err != nil {
-			fmt.Printf("Prompt failed %v\n", err)
-			return err
-		}
-
-		fmt.Printf("You answered %s\n", result)
+		return createNewDir()
 	} else {
 		fmt.Println("Moving forward without create a new folder.")
 	}
 	return err
+}
+
+func createNewDir() error {
+	projectNamePrompt := promptui.Prompt{
+		Label:    "Please provide project name.",
+		Validate: validateProjectName,
+	}
+
+	result, err := projectNamePrompt.Run()
+
+	if err != nil {
+		fmt.Printf("Invalid project name %v\n", err)
+		return err
+	}
+
+	fmt.Printf("Creating new folder with the name %s ", result)
+
+	cmd := exec.Command("mkdir", result)
+
+	_, err = cmd.Output()
+
+	if err != nil {
+		fmt.Println("Error in creating the folder")
+		return err
+	}
+
+	return nil
 }
 
 func validateProjectName(input string) error {
